@@ -36,16 +36,120 @@ const watchedCount = document.getElementById('watchedCount');
 const stars = document.querySelectorAll('.rating-stars i');
 
 //Initialize the app
-function init(){
+function init() {
+    movieForm.addEventListener('submit', handleFormSubmit);
+
     stars.forEach(star => {
         star.addEventListener('click', handleStarClick);
         star.addEventListener('mouseover', handleStarHover);
         star.addEventListener('mouseout', handleStarOut);
     });
+
+    loadMovies();
+}
+
+//handle form submission
+function handleFormSubmit(e) {
+    e.preventDefault();
+
+    const title = titleInput.value.trim();
+    const year = yearInput.value;
+    const director = directorInput.value.trim();
+    const genre = genreInput.value;
+    const status = document.querySelector('input[name="status"]:checked').value;
+    const rating = ratingInput.value;
+    const notes = notesInput.value.trim();
+
+    if (!title) {
+        alert('plese enter a movie title');
+        return;
+    }
+
+    const movieData = {
+        title,
+        year: year || null,
+        director: director || null,
+        genre,
+        status,
+        rating: rating ? parseInt(rating) : 0,
+        notes: notes || null,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    database.ref('movies').push(movieData)
+        .then(() => {
+            showAlert('Movie Added Successully', 'success')
+            movieForm.reset();
+        })
+        .catch(error => {
+            showAlert('Error in Adding Movie ' + error.message, 'error');
+        });
+}
+
+function loadMovies() {
+    database.ref('movies').on('value', (snapshot) => {
+        const movies = [];
+        let watchlist = 0;
+        let watched = 0;
+
+        snapshot.forEach((childSnapshot) => {
+            const movie = {
+                id: childSnapshot.key,
+                ...childSnapshot.val()
+            };
+            movies.push(movie);
+
+            if (movie.status === 'watchlist') {
+                watchlist++;
+            } else if (movie.status === 'watched') {
+                watched++;
+            }
+        });
+        totalMovies.textContent = movies.length;
+        watchlistCount.textContent = watchlist;
+        watchedCount.textContent = watched;
+
+        displayMovies(movies);
+    });
+}
+
+function displayMovies(movies) {
+    if (movies.length === 0) {
+        moviesList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-film"></i>
+                <h3>No movies Found</h3>
+                <p>Add your first movie to get started!</p>
+            </div>
+        `;
+        return;
+    }
+
+    moviesList.innerHTML = '';
+
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.className = 'movie-card';
+        movieCard.dataset.id = movie.id;
+
+        movieCard.innerHTML = `
+            <div class="movie-poster" style="background-image: url('${image.posterUrl || ''}')">
+                <span class="movie-status ${movie.status}">
+                    ${movie.status}
+                </span>
+            </div>
+        `;
+    })
+}
+
+//helping function
+function showAlert(messege, type) {
+    alert(`${type.toUpperCase()}: ${messege}`);
 }
 
 // star rating functionalities
-function handleStarClick(e) { 
+function handleStarClick(e) {
     const rating = parseInt(e.target.dataset.rating);
     ratingInput.value = rating;
     updateStarRating(rating);
@@ -59,25 +163,25 @@ function handleStarHover(e) {
 function handleStarOut() {
     const currentRating = parseInt(ratingInput.value);
     highlightStars(currentRating);
- }
+}
 
 function highlightStars(cont) {
     stars.forEach((star, index) => {
-        if(index < cont){
+        if (index < cont) {
             star.classList.add('active');
-        } else{
-            star.classList.remove('active');                                                                                                        
+        } else {
+            star.classList.remove('active');
         }
     })
 }
 
-function updateStarRating(rating){
+function updateStarRating(rating) {
     stars.forEach((star, index) => {
-        if(index < rating){
+        if (index < rating) {
             star.classList.add('active');
             star.classList.remove('far');
             star.classList.add('fas');
-        } else{
+        } else {
             star.classList.remove('active');
             star.classList.remove('fas');
             star.classList.add('far');

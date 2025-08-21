@@ -109,6 +109,17 @@ header p {
     border-color: var(--primary-color);
 }
 
+.rating-stars {
+    font-size: 1.5rem;
+    color: var(--gray-color);
+    cursor: pointer;
+    transition: color 0.2s; 
+}
+
+.rating-stars i.active {
+    color: #ffc107
+}
+
 .radio-group {
     display: flex;
     gap: 15px;
@@ -224,4 +235,16 @@ header p {
 .stat-label {
     font-size: 0.9rem;
     color: var(--gray-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--gray-color);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
 }
