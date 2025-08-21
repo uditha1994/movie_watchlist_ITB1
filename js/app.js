@@ -32,3 +32,57 @@ const moviesList = document.getElementById('moviesList');
 const totalMovies = document.getElementById('totalMovies');
 const watchlistCount = document.getElementById('watchlistCount');
 const watchedCount = document.getElementById('watchedCount');
+
+const stars = document.querySelectorAll('.rating-stars i');
+
+//Initialize the app
+function init(){
+    stars.forEach(star => {
+        star.addEventListener('click', handleStarClick);
+        star.addEventListener('mouseover', handleStarHover);
+        star.addEventListener('mouseout', handleStarOut);
+    });
+}
+
+// star rating functionalities
+function handleStarClick(e) { 
+    const rating = parseInt(e.target.dataset.rating);
+    ratingInput.value = rating;
+    updateStarRating(rating);
+}
+
+function handleStarHover(e) {
+    const rating = parseInt(e.target.dataset.rating);
+    highlightStars(rating);
+}
+
+function handleStarOut() {
+    const currentRating = parseInt(ratingInput.value);
+    highlightStars(currentRating);
+ }
+
+function highlightStars(cont) {
+    stars.forEach((star, index) => {
+        if(index < cont){
+            star.classList.add('active');
+        } else{
+            star.classList.remove('active');                                                                                                        
+        }
+    })
+}
+
+function updateStarRating(rating){
+    stars.forEach((star, index) => {
+        if(index < rating){
+            star.classList.add('active');
+            star.classList.remove('far');
+            star.classList.add('fas');
+        } else{
+            star.classList.remove('active');
+            star.classList.remove('fas');
+            star.classList.add('far');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', init);
